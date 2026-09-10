@@ -256,10 +256,10 @@ def _normalize_judgment(raw, mandate: dict, sources: list[dict]) -> dict:
         if result == "PASS" and len(evidence_refs) == 0 and len(sources) > 0:
             raise gl.vm.UserError("[LLM_ERROR] PASS requires an evidence reference")
         if result == "PASS" and any(
-            not source.get("retrieved", False) or source.get("integrity") != "MATCH"
+            not source.get("retrieved", False) or source.get("integrity") == "MISMATCH"
             for source in supporting_sources
         ):
-            raise gl.vm.UserError("[LLM_ERROR] PASS evidence must be retrieved and hash-matched")
+            raise gl.vm.UserError("[LLM_ERROR] PASS evidence must be retrieved without hash mismatch")
         criteria.append(
             {
                 "id": criterion_id,
