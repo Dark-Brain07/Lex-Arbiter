@@ -23,11 +23,11 @@ import {
 import { SAMPLE_CASES } from "@/lib/mock-data";
 import type { CaseRecord, PolicyType } from "@/lib/types";
 import { formatAddress, formatBps, computeSha256 } from "@/lib/crypto-utils";
-import { CONTRACT_ADDRESS, EXPLORER_BASE, STUDIO_BASE, fetchMetrics } from "@/lib/genlayer";
+import { CONTRACT_ADDRESS, EXPLORER_BASE, STUDIO_BASE, fetchMetrics, fetchCase } from "@/lib/genlayer";
 
 export default function Home() {
   const [activeTab, setActiveTab] = useState<"docket" | "submit" | "sandbox" | "constitution">("docket");
-  const [cases] = useState<CaseRecord[]>(SAMPLE_CASES);
+  const [cases, setCases] = useState<CaseRecord[]>(SAMPLE_CASES);
   const [selectedCase, setSelectedCase] = useState<CaseRecord>(SAMPLE_CASES[0]);
   const [searchQuery, setSearchQuery] = useState("");
   const [copied, setCopied] = useState(false);
@@ -36,7 +36,7 @@ export default function Home() {
   const [metrics, setMetrics] = useState({
     caseCount: cases.length.toString(),
     finalizedCount: cases.filter(c => c.status === "FINALIZED").length.toString(),
-    operator: "0x3A6d...8F91",
+    operator: formatAddress("0x8e5Bd026227CC93169Df51BD9C1b6CA82292F0D2"),
   });
 
   // Submission Form State
@@ -64,6 +64,19 @@ export default function Home() {
           finalizedCount: m.finalized_count,
           operator: formatAddress(m.operator),
         });
+      }
+    });
+
+    // Dynamically poll/fetch live cases
+    Promise.all([
+      fetchCase("case-1789009125755"),
+      fetchCase("case-1789006588547"),
+    ]).then(([c1, c2]) => {
+      const liveCases: CaseRecord[] = [];
+      if (c1) liveCases.push(c1);
+      if (c2) liveCases.push(c2);
+      if (liveCases.length > 0) {
+        setCases(liveCases);
       }
     });
   }, []);
@@ -186,7 +199,7 @@ export default function Home() {
           <div>
             <div className="hero-tag">
               <ShieldCheck size={14} />
-              <span>Autonomous Forensic Adjudication</span>
+              <span>Forensic Protocol</span>
             </div>
             <h1 className="hero-title">
               Promises Become <span>Provably Settled.</span>
@@ -693,8 +706,8 @@ export default function Home() {
         <div className="container footer-inner">
           <div className="flex items-center gap-3">
             <img src="/logo.png" alt="LexArbiter Logo" className="h-8 w-auto object-contain drop-shadow" />
-            <span className="font-bold text-white tracking-wide">LexArbiter</span>
-            <span className="text-muted text-xs">— The Autonomous Forensic Adjudication Protocol</span>
+            <span className="font-bold text-slate-800 tracking-wide">LexArbiter</span>
+            <span className="text-muted text-xs">— Autonomous Adjudication on GenLayer</span>
           </div>
 
           <div className="footer-links">
