@@ -127,12 +127,22 @@ export default function Home() {
       c.judgment?.summary.toLowerCase().includes(searchQuery.toLowerCase())
   );
 
+  const navigateTab = (tab: "docket" | "submit" | "sandbox" | "constitution") => {
+    setActiveTab(tab);
+    setTimeout(() => {
+      const el = document.getElementById("main-content");
+      if (el) {
+        el.scrollIntoView({ behavior: "smooth" });
+      }
+    }, 30);
+  };
+
   return (
     <div className="min-h-screen flex flex-col">
       {/* Enhanced Top Header */}
       <header className="site-header">
         <div className="container header-inner">
-          <div className="brand" onClick={() => setActiveTab("docket")}>
+          <div className="brand" onClick={() => navigateTab("docket")}>
             <div className="brand-logo-wrap">
               <img src="/logo.png" alt="LexArbiter Logo" className="brand-logo-img" />
             </div>
@@ -141,28 +151,28 @@ export default function Home() {
 
           <nav className="header-nav-pill">
             <button
-              onClick={() => setActiveTab("docket")}
+              onClick={() => navigateTab("docket")}
               className={`nav-pill-item ${activeTab === "docket" ? "active" : ""}`}
             >
               <FileCheck2 size={14} />
               <span>Case Docket</span>
             </button>
             <button
-              onClick={() => setActiveTab("submit")}
+              onClick={() => navigateTab("submit")}
               className={`nav-pill-item ${activeTab === "submit" ? "active" : ""}`}
             >
               <Terminal size={14} />
               <span>Submit Mandate</span>
             </button>
             <button
-              onClick={() => setActiveTab("sandbox")}
+              onClick={() => navigateTab("sandbox")}
               className={`nav-pill-item ${activeTab === "sandbox" ? "active" : ""}`}
             >
               <Fingerprint size={14} />
               <span>Evidence Sandbox</span>
             </button>
             <button
-              onClick={() => setActiveTab("constitution")}
+              onClick={() => navigateTab("constitution")}
               className={`nav-pill-item ${activeTab === "constitution" ? "active" : ""}`}
             >
               <Lock size={14} />
@@ -210,9 +220,13 @@ export default function Home() {
               and reach Prompt Comparative consensus without human bias.
             </p>
             <div className="hero-actions">
-              <button onClick={() => setActiveTab("submit")} className="btn-primary">
+              <button onClick={() => navigateTab("docket")} className="btn-primary">
+                <FileCheck2 size={15} />
+                <span>Explore Case Docket</span>
+              </button>
+              <button onClick={() => navigateTab("submit")} className="btn-secondary">
                 <Terminal size={15} />
-                <span>Open Submission Terminal</span>
+                <span>Submit Mandate</span>
               </button>
               <a
                 href={`${EXPLORER_BASE}${CONTRACT_ADDRESS}`}
@@ -221,7 +235,7 @@ export default function Home() {
                 className="btn-secondary"
               >
                 <ExternalLink size={14} />
-                <span>View on Explorer</span>
+                <span>Explorer</span>
               </a>
             </div>
           </div>
@@ -268,32 +282,32 @@ export default function Home() {
       </section>
 
       {/* Main Content Area */}
-      <main className="container flex-1">
+      <main id="main-content" className="container flex-1">
         {/* Navigation Tabs */}
         <div className="tabs-bar">
           <button
-            onClick={() => setActiveTab("docket")}
+            onClick={() => navigateTab("docket")}
             className={`tab-btn ${activeTab === "docket" ? "active" : ""}`}
           >
             <FileCheck2 size={16} />
             <span>Forensic Case Explorer</span>
           </button>
           <button
-            onClick={() => setActiveTab("submit")}
+            onClick={() => navigateTab("submit")}
             className={`tab-btn ${activeTab === "submit" ? "active" : ""}`}
           >
             <Terminal size={16} />
             <span>Case Submission Terminal</span>
           </button>
           <button
-            onClick={() => setActiveTab("sandbox")}
+            onClick={() => navigateTab("sandbox")}
             className={`tab-btn ${activeTab === "sandbox" ? "active" : ""}`}
           >
             <Fingerprint size={16} />
             <span>Evidence Sandbox</span>
           </button>
           <button
-            onClick={() => setActiveTab("constitution")}
+            onClick={() => navigateTab("constitution")}
             className={`tab-btn ${activeTab === "constitution" ? "active" : ""}`}
           >
             <Lock size={16} />
@@ -338,7 +352,12 @@ export default function Home() {
                   return (
                     <div
                       key={c.case_id}
-                      onClick={() => setSelectedCase(c)}
+                      onClick={() => {
+                        setSelectedCase(c);
+                        if (typeof window !== "undefined" && window.innerWidth < 1024) {
+                          document.getElementById("dossier-panel")?.scrollIntoView({ behavior: "smooth" });
+                        }
+                      }}
                       className={`case-card ${isSelected ? "active" : ""}`}
                     >
                       <div className="case-card-header">
@@ -357,7 +376,7 @@ export default function Home() {
             </div>
 
             {/* Case Dossier Detail */}
-            <div className="dossier-panel">
+            <div id="dossier-panel" className="dossier-panel">
               <div className="dossier-header">
                 <div className="dossier-top">
                   <div>
