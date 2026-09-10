@@ -7,4 +7,5 @@ LexArbiter is an autonomous forensic adjudication protocol for agentic agreement
 - **Contract Address:** `0x4FA892C70149522d21Ac76509559Bb1105f14205`
 - **Explorer Link:** [View on GenLayer Studio](https://explorer-studio.genlayer.com/address/0x4FA892C70149522d21Ac76509559Bb1105f14205)
 - **Source Code:** [Link to GitHub](https://github.com/Dark-Brain07/Lex-Arbiter)
+- **Live App:** [View on Vercel](https://lex-arbiter-lyart.vercel.app)
 - **Test in Studio:** [Import to GenLayer Studio](https://studio.genlayer.com/?import-contract=0x4FA892C70149522d21Ac76509559Bb1105f14205)
