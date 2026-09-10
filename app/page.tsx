@@ -69,6 +69,7 @@ export default function Home() {
 
     // Dynamically poll/fetch live cases
     Promise.all([
+      fetchCase("case-1789056011800-1"),
       fetchCase("case-1789009125755"),
       fetchCase("case-1789006588547"),
     ]).then((fetched) => {

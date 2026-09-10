@@ -112,5 +112,59 @@ export const SAMPLE_CASES: CaseRecord[] = [
       missingEvidence: [],
       appealGrounds: []
     }
+  },
+  {
+    case_id: "case-1789056011800-1",
+    mandate_hash: "0x4fe45ca5dcdfdb8e09b25fa6dcd052796081ab864dde9e4ea6f85b1ae764230b",
+    delivery_hash: "0x1b9f77747e23438d2beeddac05b3d62d3ecc07ff3bb5b85764b96139faa59a9d",
+    policy: "SOFTWARE_WEB_V1",
+    status: "FINALIZED",
+    created_at: "2026-09-10T16:00:15.898528Z",
+    updated_at: "2026-09-10T16:00:15.898528Z",
+    judgment_hash: "0x8a8672fac3b200eb0843b975432ecf93b69d6793b74f6a04db12924a4a0edc39",
+    report_hash: "0x89ccfd4bf0ef28aa537186275666d5f589742e2e6488fe0d843b9c96563be74c",
+    judgment: {
+      schemaVersion: "1.0",
+      caseId: "case-1789056011800-1",
+      verdict: "FULFILLED",
+      confidenceBps: 9600,
+      settlementBps: 10000,
+      summary: "Independent inspection confirms the public HTTPS endpoint returned 200 OK and the response body was valid JSON; all acceptance criteria pass.",
+      criteria: [
+        {
+          id: "crit-https-200",
+          weightBps: 5000,
+          critical: true,
+          description: "Primary public endpoint responds over HTTPS with valid 200 OK status",
+          result: "PASS",
+          severity: "CRITICAL",
+          evidenceRefs: ["art-api-endpoint"],
+          reasonCode: "HTTPS_200_OK",
+          reason: "Primary public endpoint responds over HTTPS with valid 200 OK status"
+        },
+        {
+          id: "crit-json-format",
+          weightBps: 5000,
+          critical: false,
+          description: "Endpoint response body is parseable as JSON content",
+          result: "PASS",
+          severity: "LOW",
+          evidenceRefs: ["art-api-endpoint"],
+          reasonCode: "JSON_VALID",
+          reason: "Endpoint response body is parseable as JSON content"
+        }
+      ],
+      admissibility: [
+        {
+          id: "art-api-endpoint",
+          status: "ADMISSIBLE",
+          reason: "Artifact independently fetched over HTTPS with HTTP 200 and parseable content."
+        }
+      ],
+      contradictions: [],
+      materialBreaches: [],
+      missingEvidence: [],
+      appealGrounds: []
+    }
   }
 ];
