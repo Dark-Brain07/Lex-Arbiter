@@ -692,9 +692,7 @@ export default function Home() {
       <footer className="site-footer">
         <div className="container footer-inner">
           <div className="flex items-center gap-3">
-            <div className="w-7 h-7 rounded-lg overflow-hidden border border-cyan-500/30 bg-slate-900/60 p-0.5 shadow-sm">
-              <img src="/logo.png" alt="LexArbiter Logo" className="w-full h-full object-cover object-top" />
-            </div>
+            <img src="/logo.png" alt="LexArbiter Logo" className="h-8 w-auto object-contain drop-shadow" />
             <span className="font-bold text-white tracking-wide">LexArbiter</span>
             <span className="text-muted text-xs">— The Autonomous Forensic Adjudication Protocol</span>
           </div>
