@@ -74,12 +74,6 @@ Open [http://localhost:3000](http://localhost:3000) to explore the Case Docket, 
 - [x] **Consensus Audit:** Governed by `gl.eq_principle.prompt_comparative`.
 - [x] **Syntax Audit:** Passed static AST verification (`python -m py_compile`).
 
----
-
-## Contributor
-
-- **Dark-Brain07** (`85172976+Dark-Brain07@users.noreply.github.com`)
-
 ## License
 
 MIT
