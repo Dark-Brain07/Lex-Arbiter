@@ -97,9 +97,11 @@ button, input, select, textarea {
 .brand {
   display: flex;
   align-items: center;
-  gap: 0.85rem;
+  gap: 0.9rem;
   cursor: pointer;
   user-select: none;
+  white-space: nowrap;
+  flex-shrink: 0;
 }
 
 .brand-logo-wrap {
@@ -115,6 +117,7 @@ button, input, select, textarea {
   box-shadow: 0 0 20px rgba(6, 182, 212, 0.25), inset 0 0 12px rgba(6, 182, 212, 0.15);
   transition: transform 0.25s ease, box-shadow 0.25s ease;
   overflow: hidden;
+  flex-shrink: 0;
 }
 
 .brand:hover .brand-logo-wrap {
@@ -130,41 +133,17 @@ button, input, select, textarea {
   filter: drop-shadow(0 2px 6px rgba(0, 0, 0, 0.6));
 }
 
-.brand-text-col {
-  display: flex;
-  flex-direction: column;
-}
-
 .brand-title {
   font-family: var(--font-display);
   font-weight: 800;
-  font-size: 1.25rem;
-  letter-spacing: -0.01em;
-  background: linear-gradient(135deg, #ffffff 30%, #a5f3fc 70%, #818cf8 100%);
+  font-size: 1.35rem;
+  letter-spacing: 0.02em;
+  background: linear-gradient(135deg, #ffffff 40%, #a5f3fc 75%, #818cf8 100%);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
-  line-height: 1.2;
-}
-
-.brand-badge {
-  font-size: 0.62rem;
-  font-family: var(--font-mono);
-  font-weight: 700;
-  padding: 0.12rem 0.45rem;
-  border-radius: 9999px;
-  background: linear-gradient(135deg, rgba(6, 182, 212, 0.2), rgba(99, 102, 241, 0.2));
-  color: #22d3ee;
-  border: 1px solid rgba(6, 182, 212, 0.35);
-  text-transform: uppercase;
-  letter-spacing: 0.06em;
-}
-
-.brand-tagline {
-  font-size: 0.68rem;
-  color: var(--text-muted);
-  font-family: var(--font-mono);
-  letter-spacing: 0.03em;
-  margin-top: 0.15rem;
+  white-space: nowrap;
+  line-height: 1;
+  display: inline-block;
 }
 
 /* Enhanced Segmented Pill Nav */

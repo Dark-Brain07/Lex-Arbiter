@@ -123,13 +123,7 @@ export default function Home() {
             <div className="brand-logo-wrap">
               <img src="/logo.png" alt="LexArbiter Logo" className="brand-logo-img" />
             </div>
-            <div className="brand-text-col">
-              <div className="flex items-center gap-2">
-                <span className="brand-title">LEX ARBITER</span>
-                <span className="brand-badge">PROTOCOL</span>
-              </div>
-              <span className="brand-tagline">Autonomous Forensic Adjudication</span>
-            </div>
+            <span className="brand-title">LEX ARBITER</span>
           </div>
 
           <nav className="header-nav-pill">
