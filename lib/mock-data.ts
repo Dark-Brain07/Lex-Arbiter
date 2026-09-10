@@ -112,5 +112,61 @@ export const SAMPLE_CASES: CaseRecord[] = [
       missingEvidence: [],
       appealGrounds: []
     }
+  },
+  {
+    case_id: "case-1789055128078",
+    mandate_hash: "0xd1701e686f7bbe48f4cdcf1a507732a4b9d9c80151195b74892e2a42f36d15ae",
+    delivery_hash: "0x424fa81296b80139a434d68e24042bfc32a2e7b348e8a409604e6c7630c2106f",
+    policy: "SOFTWARE_WEB_V1",
+    status: "FINALIZED",
+    created_at: "2026-09-10T15:45:32.194685Z",
+    updated_at: "2026-09-10T15:45:32.194685Z",
+    judgment_hash: "0x58958ebca1b4a1b06d2524e86a4d30dbb13671e00d4ba7a737b3ed2c2b54acde",
+    report_hash: "0x6ca3ec243f0e36e68ac75349de954294e96324080102af68fd069d9e99ee50c8",
+    judgment: {
+      schemaVersion: "1.0",
+      caseId: "case-1789055128078",
+      verdict: "PARTIALLY_FULFILLED",
+      confidenceBps: 8000,
+      settlementBps: 5000,
+      summary: "Critical HTTPS availability criterion satisfied; JSON schema validation could not be performed due to missing specification, resulting in a partial fulfillment.",
+      criteria: [
+        {
+          id: "crit-https-reachable",
+          weightBps: 5000,
+          critical: true,
+          description: "Primary public endpoint responds over HTTPS with valid 200 OK status",
+          result: "PASS",
+          severity: "CRITICAL",
+          evidenceRefs: ["art-api-endpoint"],
+          reasonCode: "HTTPS_200_OK",
+          reason: "Endpoint responded over HTTPS with status 200 OK"
+        },
+        {
+          id: "crit-json-payload",
+          weightBps: 5000,
+          critical: false,
+          description: "Endpoint returns valid structured JSON payload matching schema specification",
+          result: "UNVERIFIABLE",
+          severity: "LOW",
+          evidenceRefs: ["art-api-endpoint"],
+          reasonCode: "SCHEMA_MISSING",
+          reason: "Schema specification required for validation was not provided; payload structure cannot be verified"
+        }
+      ],
+      admissibility: [
+        {
+          id: "art-api-endpoint",
+          status: "ADMISSIBLE",
+          reason: "Fetched artifact over HTTPS with HTTP 200 status; content inspected and hash recorded"
+        }
+      ],
+      contradictions: [],
+      materialBreaches: [],
+      missingEvidence: [
+        "Schema definition needed to validate JSON payload was not supplied"
+      ],
+      appealGrounds: []
+    }
   }
 ];
