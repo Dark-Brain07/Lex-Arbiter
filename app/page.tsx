@@ -116,64 +116,70 @@ export default function Home() {
 
   return (
     <div className="min-h-screen flex flex-col">
-      {/* Top Header */}
+      {/* Enhanced Top Header */}
       <header className="site-header">
         <div className="container header-inner">
-          <div className="brand">
-            <div className="brand-icon">
-              <Scale size={20} />
+          <div className="brand" onClick={() => setActiveTab("docket")}>
+            <div className="brand-logo-wrap">
+              <img src="/logo.png" alt="LexArbiter Logo" className="brand-logo-img" />
             </div>
-            <div>
+            <div className="brand-text-col">
               <div className="flex items-center gap-2">
-                <span className="brand-title">LexArbiter</span>
-                <span className="brand-badge">Forensic Protocol v1.0</span>
+                <span className="brand-title">LEX ARBITER</span>
+                <span className="brand-badge">PROTOCOL</span>
               </div>
+              <span className="brand-tagline">Autonomous Forensic Adjudication</span>
             </div>
           </div>
 
-          <nav className="nav-links">
+          <nav className="header-nav-pill">
             <button
               onClick={() => setActiveTab("docket")}
-              className={`nav-link ${activeTab === "docket" ? "active" : ""}`}
+              className={`nav-pill-item ${activeTab === "docket" ? "active" : ""}`}
             >
-              Case Docket
+              <FileCheck2 size={14} />
+              <span>Case Docket</span>
             </button>
             <button
               onClick={() => setActiveTab("submit")}
-              className={`nav-link ${activeTab === "submit" ? "active" : ""}`}
+              className={`nav-pill-item ${activeTab === "submit" ? "active" : ""}`}
             >
-              Submit Mandate
+              <Terminal size={14} />
+              <span>Submit Mandate</span>
             </button>
             <button
               onClick={() => setActiveTab("sandbox")}
-              className={`nav-link ${activeTab === "sandbox" ? "active" : ""}`}
+              className={`nav-pill-item ${activeTab === "sandbox" ? "active" : ""}`}
             >
-              Evidence Sandbox
+              <Fingerprint size={14} />
+              <span>Evidence Sandbox</span>
             </button>
             <button
               onClick={() => setActiveTab("constitution")}
-              className={`nav-link ${activeTab === "constitution" ? "active" : ""}`}
+              className={`nav-pill-item ${activeTab === "constitution" ? "active" : ""}`}
             >
-              Constitution
+              <Lock size={14} />
+              <span>Constitution</span>
             </button>
           </nav>
 
           <div className="header-meta">
-            <div className="network-badge">
-              <span className="network-pulse" />
-              <span>StudioNet Active</span>
+            <div className="network-pill" title="Live on GenLayer StudioNet">
+              <span className="network-dot" />
+              <span>StudioNet</span>
             </div>
-            <button onClick={copyContract} className="btn-secondary" title="Click to copy contract address">
-              <Copy size={13} />
-              <span>{copied ? "Copied!" : formatAddress(CONTRACT_ADDRESS)}</span>
+            <button onClick={copyContract} className="contract-copy-pill" title="Click to copy contract address">
+              <Copy size={12} className={copied ? "text-cyan-400" : "text-muted"} />
+              <span className="font-mono">{copied ? "Copied!" : formatAddress(CONTRACT_ADDRESS)}</span>
             </button>
             <a
               href={`${STUDIO_BASE}${CONTRACT_ADDRESS}`}
               target="_blank"
               rel="noreferrer"
-              className="btn-primary"
+              className="studio-btn"
+              title="Open contract in GenLayer Studio"
             >
-              <Cpu size={14} />
+              <Cpu size={13} />
               <span>Studio Import</span>
             </a>
           </div>
@@ -691,10 +697,12 @@ export default function Home() {
       {/* Footer */}
       <footer className="site-footer">
         <div className="container footer-inner">
-          <div className="flex items-center gap-2">
-            <Scale size={16} className="text-cyan-400" />
-            <span className="font-bold text-white">LexArbiter</span>
-            <span>— The Autonomous Forensic Adjudication Protocol</span>
+          <div className="flex items-center gap-3">
+            <div className="w-7 h-7 rounded-lg overflow-hidden border border-cyan-500/30 bg-slate-900/60 p-0.5 shadow-sm">
+              <img src="/logo.png" alt="LexArbiter Logo" className="w-full h-full object-cover object-top" />
+            </div>
+            <span className="font-bold text-white tracking-wide">LexArbiter</span>
+            <span className="text-muted text-xs">— The Autonomous Forensic Adjudication Protocol</span>
           </div>
 
           <div className="footer-links">
