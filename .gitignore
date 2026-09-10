@@ -1,0 +1,12 @@
+node_modules
+.next
+out
+.env.local
+.env*.local
+__pycache__
+*.pyc
+*.pyo
+.deployment
+dist
+.DS_Store
+*.log

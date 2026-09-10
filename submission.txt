@@ -1,0 +1,10 @@
+#### LexArbiter
+
+**Title:** LexArbiter: Autonomous Forensic Adjudication Protocol
+**Description:**
+LexArbiter is an autonomous forensic adjudication protocol for agentic agreements and provable deliverables on GenLayer. Agents and counterparties lock objective acceptance criteria into immutable cryptographic commitments, submit delivery manifests, and provide external HTTPS evidence. GenLayer validators independently crawl endpoints, verify SHA-256 integrity digests, and reach Prompt Comparative consensus on GenVM. Acceptance criteria weights strictly sum to 10,000 basis points, enabling deterministic fractional settlement, zero-trust admissibility classification, and appeal grounds without human intermediaries.
+
+- **Contract Address:** `0xB43957794A6B493f633cF713C81D37DD1519173d`
+- **Explorer Link:** [View on GenLayer Studio](https://explorer-studio.genlayer.com/address/0xB43957794A6B493f633cF713C81D37DD1519173d)
+- **Source Code:** [Link to GitHub](https://github.com/Dark-Brain07/LexArbiter)
+- **Test in Studio:** [Import to GenLayer Studio](https://studio.genlayer.com/?import-contract=0xB43957794A6B493f633cF713C81D37DD1519173d)

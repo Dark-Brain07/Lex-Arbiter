@@ -1,0 +1,29 @@
+{
+  "name": "lexarbiter",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "author": "Dark-Brain07",
+  "description": "Autonomous forensic adjudication protocol for agentic agreements & provable deliverables on GenLayer",
+  "scripts": {
+    "dev": "next dev",
+    "build": "next build",
+    "start": "next start",
+    "lint": "next lint",
+    "deploy:studionet": "node scripts/deploy.mjs",
+    "sample:case": "node scripts/sample-case.mjs"
+  },
+  "dependencies": {
+    "genlayer-js": "1.1.8",
+    "lucide-react": "^0.468.0",
+    "next": "^15.2.1",
+    "react": "^19.0.0",
+    "react-dom": "^19.0.0"
+  },
+  "devDependencies": {
+    "@types/node": "^20",
+    "@types/react": "^19",
+    "@types/react-dom": "^19",
+    "typescript": "^5"
+  }
+}
