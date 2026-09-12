@@ -18,7 +18,7 @@ export type IntegrityStatus = "MATCH" | "MISMATCH" | "UNCOMMITTED";
 export interface AcceptanceCriterion {
   id: string;
   weightBps: number;
-  critical: boolean;
+  critical?: boolean;
   description?: string;
   result?: CriterionResult;
   severity?: CriterionSeverity;

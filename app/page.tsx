@@ -18,12 +18,25 @@ import {
   Copy,
   Layers,
   Sparkles,
-  Fingerprint
+  Fingerprint,
+  Loader2,
+  ChevronDown,
+  ChevronUp,
+  RefreshCw,
 } from "lucide-react";
 import { SAMPLE_CASES } from "@/lib/mock-data";
 import type { CaseRecord, PolicyType } from "@/lib/types";
-import { formatAddress, formatBps, computeSha256 } from "@/lib/crypto-utils";
-import { CONTRACT_ADDRESS, EXPLORER_BASE, STUDIO_BASE, fetchMetrics, fetchCase } from "@/lib/genlayer";
+import { formatAddress, formatBps, computeSha256, canonicalJson } from "@/lib/crypto-utils";
+import {
+  CONTRACT_ADDRESS,
+  EXPLORER_BASE,
+  EXPLORER_TX_BASE,
+  STUDIO_BASE,
+  DEFAULT_OPERATOR_KEY,
+  fetchMetrics,
+  fetchCase,
+  submitCaseToContract,
+} from "@/lib/genlayer";
 
 export default function Home() {
   const [activeTab, setActiveTab] = useState<"docket" | "submit" | "sandbox" | "constitution">("docket");
@@ -40,7 +53,7 @@ export default function Home() {
   });
 
   // Submission Form State
-  const [mandateId, setMandateId] = useState(`LEX-${Date.now().toString().slice(-4)}`);
+  const [mandateId, setMandateId] = useState(`case-${Date.now()}`);
   const [objective, setObjective] = useState("Verify production GraphQL endpoint resilience, TLS 1.3 certificate, and response time under 300ms");
   const [policy, setPolicy] = useState<PolicyType>("SOFTWARE_WEB_V1");
   const [crit1Desc, setCrit1Desc] = useState("Endpoint returns HTTP 200 with valid schema on HTTPS");
@@ -50,6 +63,18 @@ export default function Home() {
   const [evidenceUrl, setEvidenceUrl] = useState("https://httpbin.org/get");
   const [computedMandateHash, setComputedMandateHash] = useState("0x...");
   const [computedDeliveryHash, setComputedDeliveryHash] = useState("0x...");
+
+  // On-Chain Transaction & Consensus State
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [submissionStage, setSubmissionStage] = useState<
+    "idle" | "preparing" | "broadcasting" | "consensus" | "finalized" | "error"
+  >("idle");
+  const [submittedTxHash, setSubmittedTxHash] = useState<string>("");
+  const [statusMessage, setStatusMessage] = useState<string>("");
+  const [submissionError, setSubmissionError] = useState<string>("");
+  const [customOperatorKey, setCustomOperatorKey] = useState<string>("");
+  const [showOperatorSettings, setShowOperatorSettings] = useState(false);
+  const [newlyFinalizedCase, setNewlyFinalizedCase] = useState<CaseRecord | null>(null);
 
   // Sandbox State
   const [sandboxInput, setSandboxInput] = useState("https://raw.githubusercontent.com/Dark-Brain07/sample-spec/main/evidence.json");
@@ -86,26 +111,31 @@ export default function Home() {
     });
   }, []);
 
-  // Update computed hashes dynamically
+  // Update computed hashes dynamically using exact recursive canonical serialization
   useEffect(() => {
+    const caseId = mandateId.trim();
     const mandateObj = {
-      mandateId,
-      objective,
+      mandateId: caseId,
+      objective: objective.trim(),
       policy,
+      allowPartialSettlement: true,
       acceptanceCriteria: [
-        { id: "crit-01", weightBps: Number(crit1Weight), critical: true, description: crit1Desc },
-        { id: "crit-02", weightBps: Number(crit2Weight), critical: false, description: crit2Desc },
+        { id: "crit-01", weightBps: Number(crit1Weight), critical: true, description: crit1Desc.trim() },
+        { id: "crit-02", weightBps: Number(crit2Weight), critical: false, description: crit2Desc.trim() },
       ],
     };
-    computeSha256(JSON.stringify(mandateObj)).then(setComputedMandateHash);
-
-    const deliveryObj = {
+    const deliveryBundle = {
       manifest: {
-        mandateId,
-        artifacts: [{ id: "art-01", source_kind: "artifact", url: evidenceUrl, sha256: "" }],
+        mandateId: caseId,
+        artifacts: [{ id: "art-01", source_kind: "artifact", url: evidenceUrl.trim(), sha256: "" }],
+        evidence: [],
       },
+      snapshots: [],
     };
-    computeSha256(JSON.stringify(deliveryObj)).then(setComputedDeliveryHash);
+    const mJson = canonicalJson(mandateObj);
+    const dJson = canonicalJson(deliveryBundle);
+    computeSha256(mJson).then(setComputedMandateHash);
+    computeSha256(dJson).then(setComputedDeliveryHash);
   }, [mandateId, objective, policy, crit1Desc, crit1Weight, crit2Desc, crit2Weight, evidenceUrl]);
 
   const copyContract = () => {
@@ -123,6 +153,141 @@ export default function Home() {
       setSandboxHash(hash);
       setSandboxStatus("success");
     }, 400);
+  };
+
+  const handleBrowserSubmit = async () => {
+    if (!evidenceUrl.trim().startsWith("https://")) {
+      setSubmissionError("Evidence URL must use TLS (https://). Non-HTTPS URLs are rejected by court policy.");
+      setSubmissionStage("error");
+      return;
+    }
+    const totalWeight = Number(crit1Weight) + Number(crit2Weight);
+    if (totalWeight !== 10000) {
+      setSubmissionError(
+        `Total criterion weights must equal exactly 10,000 basis points (100.00%). Current sum: ${totalWeight} bps.`
+      );
+      setSubmissionStage("error");
+      return;
+    }
+
+    setIsSubmitting(true);
+    setSubmissionError("");
+    setSubmissionStage("preparing");
+    setStatusMessage("Calculating canonical JSON serialization and cryptographic commitments...");
+
+    try {
+      const caseId = mandateId.trim();
+      const mandateObj = {
+        mandateId: caseId,
+        objective: objective.trim(),
+        policy,
+        allowPartialSettlement: true,
+        acceptanceCriteria: [
+          {
+            id: "crit-01",
+            weightBps: Number(crit1Weight),
+            critical: true,
+            description: crit1Desc.trim(),
+          },
+          {
+            id: "crit-02",
+            weightBps: Number(crit2Weight),
+            critical: false,
+            description: crit2Desc.trim(),
+          },
+        ],
+      };
+
+      const deliveryBundle = {
+        manifest: {
+          mandateId: caseId,
+          artifacts: [
+            {
+              id: "art-01",
+              source_kind: "artifact",
+              url: evidenceUrl.trim(),
+              sha256: "",
+            },
+          ],
+          evidence: [],
+        },
+        snapshots: [],
+      };
+
+      const mandateJson = canonicalJson(mandateObj);
+      const manifestJson = canonicalJson(deliveryBundle);
+      const mandateHash = await computeSha256(mandateJson);
+      const deliveryHash = await computeSha256(manifestJson);
+
+      setComputedMandateHash(mandateHash);
+      setComputedDeliveryHash(deliveryHash);
+
+      setSubmissionStage("broadcasting");
+      setStatusMessage("Signing transaction with operator account and broadcasting to GenLayer StudioNet...");
+
+      const activeKey = customOperatorKey.trim() || DEFAULT_OPERATOR_KEY;
+
+      const result = await submitCaseToContract({
+        caseId,
+        mandateJson,
+        manifestJson,
+        mandateHash,
+        deliveryHash,
+        policy,
+        operatorPrivateKey: activeKey,
+        onTxSubmitted: (tx) => {
+          setSubmittedTxHash(tx);
+          setSubmissionStage("consensus");
+          setStatusMessage(
+            "Transaction submitted to mempool. Waiting for GenVM validator consensus & finality (15-45s)..."
+          );
+        },
+        onStatusUpdate: (msg) => {
+          setStatusMessage(msg);
+        },
+      });
+
+      if (!result.success) {
+        setSubmissionError(result.error || "Transaction failed or was rejected by GenVM validators.");
+        setSubmissionStage("error");
+        setIsSubmitting(false);
+        return;
+      }
+
+      setSubmissionStage("finalized");
+      setStatusMessage("Consensus finalized! Case has been adjudicated on-chain by GenVM.");
+      setIsSubmitting(false);
+
+      if (result.caseRecord) {
+        setNewlyFinalizedCase(result.caseRecord);
+        setCases((prev) => [result.caseRecord!, ...prev.filter((c) => c.case_id !== result.caseRecord!.case_id)]);
+        setSelectedCase(result.caseRecord);
+      } else {
+        setTimeout(async () => {
+          const fresh = await fetchCase(caseId);
+          if (fresh) {
+            setNewlyFinalizedCase(fresh);
+            setCases((prev) => [fresh, ...prev.filter((c) => c.case_id !== fresh.case_id)]);
+            setSelectedCase(fresh);
+          }
+        }, 3000);
+      }
+
+      fetchMetrics().then((m) => {
+        if (m) {
+          setMetrics({
+            caseCount: m.case_count,
+            finalizedCount: m.finalized_count,
+            operator: formatAddress(m.operator),
+          });
+        }
+      });
+    } catch (err: any) {
+      console.error("Submission error:", err);
+      setSubmissionError(err?.message || "An unexpected error occurred during submission.");
+      setSubmissionStage("error");
+      setIsSubmitting(false);
+    }
   };
 
   const filteredCases = cases.filter(
@@ -612,35 +777,163 @@ export default function Home() {
               />
             </div>
 
+            {/* Advanced Operator Authority Accordion */}
+            <div className="mb-4">
+              <button
+                type="button"
+                onClick={() => setShowOperatorSettings(!showOperatorSettings)}
+                className="advanced-toggle"
+              >
+                {showOperatorSettings ? <ChevronUp size={14} /> : <ChevronDown size={14} />}
+                <span>Advanced Account Configuration (StudioNet Operator Authority)</span>
+              </button>
+              {showOperatorSettings && (
+                <div className="p-3 bg-slate-900/50 rounded-lg border border-border-dim mb-3">
+                  <div className="text-xs text-muted mb-2">
+                    <code>submit_case</code> is restricted to the deployed contract operator (
+                    <code>{formatAddress("0x8e5Bd026227CC93169Df51BD9C1b6CA82292F0D2")}</code>). A pre-configured
+                    StudioNet operator key is active by default. You can inspect or override it below:
+                  </div>
+                  <input
+                    type="password"
+                    placeholder="Default: Pre-configured StudioNet Operator Key"
+                    value={customOperatorKey}
+                    onChange={(e) => setCustomOperatorKey(e.target.value)}
+                    className="form-input font-mono text-xs w-full"
+                  />
+                </div>
+              )}
+            </div>
+
             {/* Cryptographic Pre-Flight Preview */}
             <div className="hash-preview-box">
               <div className="text-xs font-bold text-white uppercase tracking-wider mb-1">
-                Real-Time Commitment Hashes (Auto-Computed)
+                Canonical Commitment Hashes (Auto-Computed & Verified)
               </div>
               <div className="hash-line">
                 <span>Mandate Hash:</span>
-                <span className="text-cyan-400">{computedMandateHash}</span>
+                <span className="text-cyan-400 font-mono text-xs">{computedMandateHash}</span>
               </div>
               <div className="hash-line">
                 <span>Delivery Hash:</span>
-                <span className="text-indigo-400">{computedDeliveryHash}</span>
+                <span className="text-indigo-400 font-mono text-xs">{computedDeliveryHash}</span>
               </div>
             </div>
 
-            <div className="flex items-center justify-between">
-              <div className="text-xs text-muted">
-                Adjudication will be executed by GenLayer validators on StudioNet.
+            {/* Live Transaction & Consensus Feedback Card */}
+            {submissionStage !== "idle" && (
+              <div className={`tx-feedback-card ${submissionStage}`}>
+                <div className="tx-step-row justify-between">
+                  <div className="flex items-center gap-2">
+                    {submissionStage === "preparing" && <Loader2 size={18} className="tx-spinner text-cyan-400" />}
+                    {submissionStage === "broadcasting" && <Loader2 size={18} className="tx-spinner text-indigo-400" />}
+                    {submissionStage === "consensus" && <Loader2 size={18} className="tx-spinner text-sky-400" />}
+                    {submissionStage === "finalized" && <CheckCircle2 size={18} className="text-emerald-400" />}
+                    {submissionStage === "error" && <AlertTriangle size={18} className="text-rose-400" />}
+                    <span className="font-semibold text-sm">
+                      {submissionStage === "preparing" && "Preparing Canonical Payload & Commitments"}
+                      {submissionStage === "broadcasting" && "Broadcasting Transaction to StudioNet"}
+                      {submissionStage === "consensus" && "Awaiting GenVM Validator Consensus"}
+                      {submissionStage === "finalized" && "Case Adjudication Finalized On-Chain"}
+                      {submissionStage === "error" && "Submission Error"}
+                    </span>
+                  </div>
+                  {submissionStage === "finalized" && <span className="badge pass">FINALIZED</span>}
+                  {submissionStage === "consensus" && <span className="badge warning">PENDING CONSENSUS</span>}
+                </div>
+
+                <p className="text-xs text-muted mb-3">{statusMessage}</p>
+
+                {submittedTxHash && (
+                  <div className="p-2.5 rounded bg-slate-900/60 border border-slate-700/50 mb-3 flex items-center justify-between text-xs font-mono">
+                    <span className="text-muted truncate max-w-[70%]">Tx: {submittedTxHash}</span>
+                    <a
+                      href={`${EXPLORER_TX_BASE}${submittedTxHash}`}
+                      target="_blank"
+                      rel="noreferrer"
+                      className="flex items-center gap-1 text-sky-400 hover:text-sky-300 font-sans font-medium"
+                    >
+                      <span>View in Explorer</span>
+                      <ExternalLink size={12} />
+                    </a>
+                  </div>
+                )}
+
+                {submissionStage === "finalized" && newlyFinalizedCase && (
+                  <div className="p-3 bg-emerald-950/30 rounded border border-emerald-500/30 mb-3 text-xs">
+                    <div className="flex items-center justify-between mb-1">
+                      <span className="font-semibold text-emerald-300">
+                        Finalized Verdict: {newlyFinalizedCase.judgment?.verdict}
+                      </span>
+                      <span className="text-emerald-400 font-mono">
+                        Settlement: {formatBps(newlyFinalizedCase.judgment?.settlementBps)}
+                      </span>
+                    </div>
+                    <p className="text-slate-300 line-clamp-2">{newlyFinalizedCase.judgment?.summary}</p>
+                    <div className="mt-3 flex gap-2">
+                      <button
+                        onClick={() => {
+                          setSelectedCase(newlyFinalizedCase);
+                          navigateTab("docket");
+                        }}
+                        className="btn-primary text-xs py-1.5 px-3"
+                      >
+                        <span>View Full Dossier in Docket</span>
+                        <ChevronRight size={13} />
+                      </button>
+                      <button
+                        onClick={() => {
+                          setSubmissionStage("idle");
+                          setMandateId(`case-${Date.now()}`);
+                        }}
+                        className="btn-secondary text-xs py-1.5 px-3"
+                      >
+                        <span>Create Another Mandate</span>
+                      </button>
+                    </div>
+                  </div>
+                )}
+
+                {submissionStage === "error" && (
+                  <div className="p-3 bg-rose-950/30 rounded border border-rose-500/30 mb-3 text-xs text-rose-300">
+                    <p className="font-mono break-all">{submissionError}</p>
+                    <button
+                      onClick={() => setSubmissionStage("idle")}
+                      className="mt-2 text-xs text-rose-400 hover:underline font-medium"
+                    >
+                      Dismiss & Edit
+                    </button>
+                  </div>
+                )}
+              </div>
+            )}
+
+            <div className="flex items-center justify-between mt-4">
+              <div className="text-xs text-muted flex items-center gap-2">
+                <Lock size={13} className="text-cyan-400" />
+                <span>Dispatched to GenLayer StudioNet via canonical operator channel</span>
               </div>
               <button
-                onClick={() => {
-                  alert(
-                    `Case ${mandateId} submitted to dispatch queue!\nTo run live on StudioNet, execute:\n\nnpm run sample:case`
-                  );
-                }}
-                className="btn-primary"
+                onClick={handleBrowserSubmit}
+                disabled={isSubmitting}
+                className="btn-primary disabled:opacity-50 disabled:cursor-not-allowed"
               >
-                <Terminal size={15} />
-                <span>Submit to LexArbiter Contract</span>
+                {isSubmitting ? (
+                  <>
+                    <Loader2 size={15} className="tx-spinner" />
+                    <span>
+                      {submissionStage === "preparing" && "Computing Hashes..."}
+                      {submissionStage === "broadcasting" && "Broadcasting..."}
+                      {submissionStage === "consensus" && "Validators Voting..."}
+                      {submissionStage === "finalized" && "Finalized!"}
+                    </span>
+                  </>
+                ) : (
+                  <>
+                    <Terminal size={15} />
+                    <span>Submit to LexArbiter Contract</span>
+                  </>
+                )}
               </button>
             </div>
           </section>

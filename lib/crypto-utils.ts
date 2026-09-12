@@ -10,7 +10,21 @@ export async function computeSha256(text: string): Promise<string> {
 }
 
 export function canonicalJson(obj: unknown): string {
-  return JSON.stringify(obj, Object.keys(obj as object).sort(), 0);
+  if (obj === null || typeof obj !== "object") {
+    return JSON.stringify(obj);
+  }
+  if (Array.isArray(obj)) {
+    return "[" + obj.map(canonicalJson).join(",") + "]";
+  }
+  const record = obj as Record<string, unknown>;
+  const sortedKeys = Object.keys(record).sort();
+  return (
+    "{" +
+    sortedKeys
+      .map((key) => JSON.stringify(key) + ":" + canonicalJson(record[key]))
+      .join(",") +
+    "}"
+  );
 }
 
 export function formatAddress(address?: string): string {
