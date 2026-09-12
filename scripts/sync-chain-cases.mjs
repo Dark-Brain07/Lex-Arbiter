@@ -5,6 +5,7 @@ import { writeFile } from "node:fs/promises";
 async function sync() {
   const client = createClient({ chain: studionet });
   const caseIds = [
+    "case-1789179129919",
     "case-1789056699432-7",
     "case-1789056624905-6",
     "case-1789056566610-5",

@@ -54,12 +54,14 @@ export default function Home() {
 
   // Submission Form State
   const [mandateId, setMandateId] = useState(`case-${Date.now()}`);
-  const [objective, setObjective] = useState("Verify production GraphQL endpoint resilience, TLS 1.3 certificate, and response time under 300ms");
+  const [objective, setObjective] = useState(
+    "Verify public web service availability, TLS certificate compliance, and structured JSON health payload"
+  );
   const [policy, setPolicy] = useState<PolicyType>("SOFTWARE_WEB_V1");
-  const [crit1Desc, setCrit1Desc] = useState("Endpoint returns HTTP 200 with valid schema on HTTPS");
-  const [crit1Weight, setCrit1Weight] = useState(6000);
-  const [crit2Desc, setCrit2Desc] = useState("P95 latency benchmark stays below 300ms under 50 concurrent requests");
-  const [crit2Weight, setCrit2Weight] = useState(4000);
+  const [crit1Desc, setCrit1Desc] = useState("Primary endpoint responds over HTTPS with valid 200 OK status");
+  const [crit1Weight, setCrit1Weight] = useState(5000);
+  const [crit2Desc, setCrit2Desc] = useState("Endpoint returns valid structured JSON response payload");
+  const [crit2Weight, setCrit2Weight] = useState(5000);
   const [evidenceUrl, setEvidenceUrl] = useState("https://httpbin.org/get");
   const [computedMandateHash, setComputedMandateHash] = useState("0x...");
   const [computedDeliveryHash, setComputedDeliveryHash] = useState("0x...");

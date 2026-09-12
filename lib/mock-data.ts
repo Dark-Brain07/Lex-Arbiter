@@ -6,6 +6,61 @@ import type { CaseRecord } from "./types";
  */
 export const SAMPLE_CASES: CaseRecord[] = [
   {
+    "case_id": "case-1789179129919",
+    "created_at": "2026-09-12T02:12:17.879106Z",
+    "delivery_hash": "0x9bf673b9fb252fe790d8d8312a4a9d64903a661bf9e7a4dc1f0a76849662be87",
+    "judgment": {
+      "admissibility": [
+        {
+          "id": "art-01",
+          "reason": "Retrieved live response matches submitted URL and returns valid status",
+          "status": "ADMISSIBLE"
+        }
+      ],
+      "appealGrounds": [],
+      "caseId": "case-1789179129919",
+      "confidenceBps": 9500,
+      "contradictions": [],
+      "criteria": [
+        {
+          "evidenceRefs": [
+            "art-01"
+          ],
+          "id": "crit-01",
+          "reason": "HTTPS request to provided endpoint returned 200 OK",
+          "reasonCode": "HTTPS_200_OK",
+          "result": "PASS",
+          "severity": "CRITICAL",
+          "weightBps": 5000
+        },
+        {
+          "evidenceRefs": [
+            "art-01"
+          ],
+          "id": "crit-02",
+          "reason": "Response body is valid structured JSON",
+          "reasonCode": "STRUCTURED_JSON",
+          "result": "PASS",
+          "severity": "HIGH",
+          "weightBps": 5000
+        }
+      ],
+      "evidenceCommitment": "0xe2ca0c723713f3b95fe0e83a4eead2f9540af7d5366a08c91af46bcd7eedc4b8",
+      "materialBreaches": [],
+      "missingEvidence": [],
+      "schemaVersion": "1.0",
+      "settlementBps": 10000,
+      "summary": "Both acceptance criteria satisfied by live HTTPS response containing valid JSON payload",
+      "verdict": "FULFILLED"
+    },
+    "judgment_hash": "0xb377755dfbae360274dc3a7b14f20d2da0cf7d05bfc47971280188cb5aaff53d",
+    "mandate_hash": "0xf183246416062d6942fc87da006a3a65a9ac8a0b966fe3ef19ee51fea08f63ee",
+    "policy": "SOFTWARE_WEB_V1",
+    "report_hash": "0x387d73db573868cfa3004941ba4cd910ff1a245a4796db4656411a3e38fdb78d",
+    "status": "FINALIZED",
+    "updated_at": "2026-09-12T02:12:17.879106Z"
+  },
+  {
     "case_id": "case-1789056699432-7",
     "created_at": "2026-09-10T16:11:43.075227Z",
     "delivery_hash": "0x948eb01f55fe9471c1f620e53a9f5adae612ee9eb668c596fda05a03ea16e0ee",
